@@ -37,34 +37,39 @@ public:
 };
 
 int main() {
-	int NumFilesToAverage = 10;
-	for (int n = 0; n < 5; n++) {
-		std::vector<Point> XY;
-		std::string dummyline;	//go into loop, grab the header.
-		for (int i = 0; i < 10; i++) {
-			std::ifstream CStream("C_t/C_t" + std::to_string(i + 10 * n + 1) + ".data");
-			std::getline(CStream, dummyline);	//columns have headers. throw away header before recording values
-			double a = 0, b = 0;
-			if (i == 0) {	//if first file, use that file to determine the proper length of the vector
-				while (CStream >> a >> b) {
-					Point mypoint = { a, b};
-					XY.push_back(mypoint);
+	int NumFilesToAverage = 10;	//How many curves to average
+	int NumVariables = 5;	//How many different "types" of curves, i.e. different sets of simulation parameters
+	std::vector<std::string> InputFilename = { "C_t/C_t", "rdf/rdf", "RotOrder/RotOrder" };
+	std::vector<std::string> OutputFilename = { "C_t/Average", "rdf/Average", "RotOrder/Average" };
+	for (auto n : InputFilename) {
+		for (int n = 0; n < NumVariables; n++) {
+			std::vector<Point> XY;
+			std::string dummyline;	//go into loop, grab the header.
+			for (int i = 0; i < 10; i++) {
+				std::ifstream CStream(InputFilename[2] + std::to_string(i + 10 * n + 1) + ".data");
+				std::getline(CStream, dummyline);	//columns have headers. throw away header before recording values
+				double a = 0, b = 0, c = 0, d = 0;
+				if (i == 0) {	//if first file, use that file to determine the proper length of the vector
+					while (CStream >> a >> b) {
+						Point mypoint = { a, b };
+						XY.push_back(mypoint);
+					}
+				}
+				else {
+					int counter = 0;
+					while (CStream >> a >> b) {
+						Point mypoint = { a,b };
+						XY[counter] = XY[counter] + mypoint;
+						counter += 1;
+					}
 				}
 			}
-			else {
-				int counter = 0;
-				while (CStream >> a >> b) {
-					Point mypoint = { a,b };
-					XY[counter]= XY[counter] + mypoint;
-					counter += 1;
-				}
+			std::ofstream mystream(OutputFilename[2] + std::to_string(n + 1) + ".data");
+			mystream << dummyline << '\n'; //give the column headers back
+			for (auto& i : XY) {
+				mystream << i.x() / NumFilesToAverage << '\t' << i.y() / NumFilesToAverage << '\n';
 			}
+			std::vector<Point>().swap(XY);	//swap with temporary empty vector to delete, deallocate
 		}
-		std::ofstream mystream("C_t/Average" + std::to_string(n + 1) + ".data");
-		mystream << dummyline << '\n'; //give the column headers back
-		for (auto& i : XY) {
-			mystream << i.x() / NumFilesToAverage << '\t' << i.y() / NumFilesToAverage << '\n';
-		}
-		std::vector<Point>().swap(XY);	//swap with temporary empty vector to delete, deallocate
 	}
 }
