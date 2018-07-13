@@ -28,25 +28,26 @@ public:
 	double y() { return yval; }
 
 	// Add or subtract two points.
-	Point operator+(Point b){
+	Point operator+(Point b) {
 		return Point(xval + b.xval, yval + b.yval);
 	}
-	Point operator-(Point b){
+	Point operator-(Point b) {
 		return Point(xval - b.xval, yval - b.yval);
 	}
 };
 
 int main() {
-	int NumFilesToAverage = 10;	//How many curves to average
-	int NumVariables = 5;	//How many different "types" of curves, i.e. different sets of simulation parameters
+	int NumFilesToAverage = 100;	//How many curves to average
+	int NumVariables = 25;	//How many different "types" of curves, i.e. different sets of simulation parameters
 	std::vector<std::string> InputFilename = { "C_t/C_t", "rdf/rdf", "RotOrder/RotOrder" };
 	std::vector<std::string> OutputFilename = { "C_t/Average", "rdf/Average", "RotOrder/Average" };
-	for (auto n : InputFilename) {
+	std::cout << "is this thing on?" << '\n';
+	for (int a = 0; a < InputFilename.size(); a++) {
 		for (int n = 0; n < NumVariables; n++) {
 			std::vector<Point> XY;
 			std::string dummyline;	//go into loop, grab the header.
-			for (int i = 0; i < 10; i++) {
-				std::ifstream CStream(InputFilename[2] + std::to_string(i + 10 * n + 1) + ".data");
+			for (int i = 0; i < NumFilesToAverage; i++) {
+				std::ifstream CStream(InputFilename[a] + std::to_string(i + NumFilesToAverage * n + 1) + ".data");
 				std::getline(CStream, dummyline);	//columns have headers. throw away header before recording values
 				double a = 0, b = 0, c = 0, d = 0;
 				if (i == 0) {	//if first file, use that file to determine the proper length of the vector
@@ -64,7 +65,7 @@ int main() {
 					}
 				}
 			}
-			std::ofstream mystream(OutputFilename[2] + std::to_string(n + 1) + ".data");
+			std::ofstream mystream(OutputFilename[a] + std::to_string(n + 1) + ".data");
 			mystream << dummyline << '\n'; //give the column headers back
 			for (auto& i : XY) {
 				mystream << i.x() / NumFilesToAverage << '\t' << i.y() / NumFilesToAverage << '\n';
@@ -72,4 +73,5 @@ int main() {
 			std::vector<Point>().swap(XY);	//swap with temporary empty vector to delete, deallocate
 		}
 	}
+	std::cout << "testing testing " << '\n';
 }
